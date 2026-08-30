@@ -1,0 +1,74 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-manager
+
+  cloud:
+    gateway:
+      # RF-15: CORS solo para el origen del frontend
+      globalcors:
+        cors-configurations:
+          "[/**]":
+            allowedOrigins:
+              - "https://ticket-films-frontend.vercel.app"
+              - "http://localhost:5173" # dev local del frontend
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+      # RF-13: solo se exponen las rutas necesarias hacia los 3 microservicios
+      routes:
+        # --- ms-cartelera: pública (RF-16) ---
+        - id: cartelera-route
+          uri: http://ms-cartelera:8081 # reemplazar por IP/DNS interno en EC2
+          predicates:
+            - Path=/api/cartelera/**
+          filters:
+            - StripPrefix=1
+
+        # --- ms-asientos: protegida ---
+        - id: asientos-route
+          uri: http://ms-asientos:8082
+          predicates:
+            - Path=/api/asientos/**
+          filters:
+            - StripPrefix=1
+
+        # --- ms-boletos: protegida ---
+        - id: boletos-route
+          uri: http://ms-boletos:8083
+          predicates:
+            - Path=/api/boletos/**
+          filters:
+            - StripPrefix=1
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # URL del emisor: tu User Pool de Cognito (una vez creado)
+          issuer-uri: https://cognito-idp.us-east-1.amazonaws.com/TU_USER_POOL_ID
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,gateway,info
+  endpoint:
+    gateway:
+      enabled: true #habilita el endpoint /actuator/gateway para ver las rutas configuradas en el gateway
+
+# RNF-07: trazabilidad de 401/403
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: INFO
+    com.ticketfilms.api_manager: DEBUG
