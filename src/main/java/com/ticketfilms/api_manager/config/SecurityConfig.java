@@ -1,5 +1,7 @@
 package com.ticketfilms.api_manager.config;
 
+import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -9,8 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import reactor.core.publisher.Mono;
@@ -20,6 +24,8 @@ import reactor.core.publisher.Mono;
 public class SecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+
+    private final JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -52,7 +58,9 @@ public class SecurityConfig {
     }
 
     private Mono<AbstractAuthenticationToken> logAndConvert(Jwt jwt) {
-        log.info("JWT valido - subject={} issuer={}", jwt.getSubject(), jwt.getIssuer());
-        return Mono.just(new JwtAuthenticationToken(jwt));
+        Collection<GrantedAuthority> authorities = authoritiesConverter.convert(jwt);
+        log.info("JWT valido - subject={} issuer={} authorities={}",
+                jwt.getSubject(), jwt.getIssuer(), authorities);
+        return Mono.just(new JwtAuthenticationToken(jwt, authorities));
     }
 }
