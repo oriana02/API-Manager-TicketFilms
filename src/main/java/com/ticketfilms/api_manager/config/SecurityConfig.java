@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchanges -> exchanges
                 .pathMatchers(HttpMethod.GET, "/api/cartelera/**").permitAll()
+                .pathMatchers(HttpMethod.GET, "/api/asientos/sala").permitAll()
                 .pathMatchers("/actuator/**").permitAll()
                 .pathMatchers("/api/asientos/**").authenticated()
                 .pathMatchers("/api/boletos/**").authenticated()

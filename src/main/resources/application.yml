@@ -53,6 +53,9 @@ spring:
         jwt:
           issuer-uri: ${COGNITO_ISSUER_URI}
 
+cognito:
+  client-id: ${COGNITO_CLIENT_ID}
+
 management:
   endpoints:
     web:
