@@ -27,25 +27,20 @@ spring:
       # RF-13: solo se exponen las rutas necesarias hacia los 3 microservicios
       routes:
         - id: cartelera-route
-          uri: http://ms-cartelera:8081
+          uri: http://localhost:8081
           predicates:
             - Path=/api/cartelera/**
-          filters:
-            - StripPrefix=1
 
         - id: asientos-route
-          uri: http://ms-asientos:8082
+          uri: http://localhost:8082
           predicates:
             - Path=/api/asientos/**
-          filters:
-            - StripPrefix=1
 
         - id: boletos-route
-          uri: http://ms-boletos:8083
+          uri: http://localhost:8083
           predicates:
             - Path=/api/boletos/**
-          filters:
-            - StripPrefix=1
+          
 
   security:
     oauth2:
