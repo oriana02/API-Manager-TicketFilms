@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  api-manager:
+    build: .
+    container_name: api-manager-container
+    ports:
+      - "8080:8080"
+    environment:
+      - COGNITO_ISSUER_URI=${COGNITO_ISSUER_URI}
+      - COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID}
+    restart: always
