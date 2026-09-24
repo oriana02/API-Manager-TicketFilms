@@ -1,5 +1,7 @@
 package com.ticketfilms.api_manager.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +14,9 @@ import org.springframework.security.oauth2.jwt.*;
 @Configuration
 public class JwtDecoderConfig {
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    private static final Logger log = LoggerFactory.getLogger(JwtDecoderConfig.class);
+
+    @Value("${cognito.issuer-uri}")
     private String issuerUri;
 
     @Value("${cognito.client-id}")
@@ -20,6 +24,9 @@ public class JwtDecoderConfig {
 
     @Bean
     public ReactiveJwtDecoder jwtDecoder() {
+        log.info("Construyendo ReactiveJwtDecoder custom: issuer={} clientId={}",
+                issuerUri, expectedClientId);
+
         NimbusReactiveJwtDecoder decoder
                 = (NimbusReactiveJwtDecoder) ReactiveJwtDecoders.fromIssuerLocation(issuerUri);
 
@@ -30,7 +37,7 @@ public class JwtDecoderConfig {
                 return OAuth2TokenValidatorResult.success();
             }
             return OAuth2TokenValidatorResult.failure(
-                    new OAuth2Error("invalid_token", "El client_id del token no coincide", null));
+                    new OAuth2Error("invalid_token", "El client_id del token no coincide: " + clientId, null));
         };
 
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(withIssuer, withAudience));
