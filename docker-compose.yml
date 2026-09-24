@@ -8,5 +8,5 @@ services:
       - "8080:8080"
     environment:
       - COGNITO_ISSUER_URI=${COGNITO_ISSUER_URI}
-      - COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID}
+      - COGNITO_CLIENT_ID=34f47e0ai20b9u6e8srd2fnphm
     restart: always
