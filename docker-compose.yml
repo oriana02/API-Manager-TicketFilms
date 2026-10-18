@@ -1,12 +1,23 @@
-version: '3.8'
-
+# Requiere la red compartida: docker network create ticketfilms-net
+# Por defecto llama a los microservicios por nombre de contenedor.
+# Si los backends están en otro servidor, define las *_URL en .env.
 services:
   api-manager:
     build: .
-    container_name: api-manager-container
+    container_name: api-manager
+    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
-      - COGNITO_ISSUER_URI=${COGNITO_ISSUER_URI}
-      - COGNITO_CLIENT_ID=${COGNITO_CLIENT_ID}
-    restart: always
+      JAVA_TOOL_OPTIONS: "-Xmx256m"
+      COGNITO_ISSUER_URI: ${COGNITO_ISSUER_URI}
+      COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID}
+      CARTELERA_URL: ${CARTELERA_URL:-http://ms-cartelera:8081}
+      ASIENTOS_URL: ${ASIENTOS_URL:-http://ms-asientos:8082}
+      BOLETOS_URL: ${BOLETOS_URL:-http://ms-boletos:8083}
+      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-http://ms-notificaciones:8084}
+
+networks:
+  default:
+    name: ticketfilms-net
+    external: true
