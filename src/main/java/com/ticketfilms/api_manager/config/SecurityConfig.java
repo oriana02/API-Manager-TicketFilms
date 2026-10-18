@@ -1,10 +1,12 @@
 package com.ticketfilms.api_manager.config;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -13,6 +15,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
@@ -29,10 +32,16 @@ public class SecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
+    // Cognito entrega los grupos del usuario en este claim; cada grupo se convierte
+    // en la autoridad GRUPO_<nombre> (mismo criterio que ms-notificaciones).
+    private static final String CLAIM_GRUPOS = "cognito:groups";
+    private static final String PREFIJO_GRUPO = "GRUPO_";
+
     private final JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
+            @Value("${app.admin.group:admin}") String grupoAdmin) {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -41,6 +50,8 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.GET, "/api/cartelera/**").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/asientos/sala").permitAll()
                 .pathMatchers("/actuator/**").permitAll()
+                // API de administración de Kafka (ms-notificaciones): solo el grupo admin
+                .pathMatchers("/api/admin/**").hasAuthority(PREFIJO_GRUPO + grupoAdmin)
                 .pathMatchers("/api/asientos/**").authenticated()
                 .pathMatchers("/api/boletos/**").authenticated()
                 .anyExchange().authenticated()
@@ -80,7 +91,11 @@ public class SecurityConfig {
     }
 
     private Mono<AbstractAuthenticationToken> logAndConvert(Jwt jwt) {
-        Collection<GrantedAuthority> authorities = authoritiesConverter.convert(jwt);
+        Collection<GrantedAuthority> authorities = new ArrayList<>(authoritiesConverter.convert(jwt));
+        List<String> grupos = jwt.getClaimAsStringList(CLAIM_GRUPOS);
+        if (grupos != null) {
+            grupos.forEach(g -> authorities.add(new SimpleGrantedAuthority(PREFIJO_GRUPO + g)));
+        }
         log.info("JWT valido - subject={} issuer={} authorities={}",
                 jwt.getSubject(), jwt.getIssuer(), authorities);
         return Mono.just(new JwtAuthenticationToken(jwt, authorities));

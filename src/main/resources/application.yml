@@ -24,7 +24,7 @@ spring:
               - "*"
             allowCredentials: true
 
-      # RF-13: solo se exponen las rutas necesarias hacia los 3 microservicios
+      # RF-13: solo se exponen las rutas necesarias hacia los microservicios
       routes:
         - id: cartelera-route
           uri: http://172.31.46.157:8081
@@ -41,9 +41,27 @@ spring:
           predicates:
             - Path=/api/boletos/**
 
+        # API de administración de Kafka (ms-notificaciones). El gateway exige
+        # el grupo admin antes de reenviar; ms-notificaciones valida de nuevo.
+        - id: notificaciones-admin-route
+          uri: http://172.31.46.157:8084
+          predicates:
+            - Path=/api/admin/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${COGNITO_ISSUER_URI}
+
 cognito:
   client-id: ${COGNITO_CLIENT_ID}
   issuer-uri: ${COGNITO_ISSUER_URI}
+
+# Grupo de Cognito que puede usar /api/admin/** (lo lee SecurityConfig)
+app:
+  admin:
+    group: admin
 
 management:
   endpoints:
