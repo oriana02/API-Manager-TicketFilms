@@ -43,7 +43,7 @@ spring:
 
         # API de administración de Kafka (ms-notificaciones). El gateway exige
         # el grupo admin antes de reenviar; ms-notificaciones valida de nuevo.
-        - id: notificaciones-admin-route
+        - id: notificaciones-route
           uri: ${NOTIFICACIONES_URL:http://172.31.46.157:8084}
           predicates:
             - Path=/api/admin/**

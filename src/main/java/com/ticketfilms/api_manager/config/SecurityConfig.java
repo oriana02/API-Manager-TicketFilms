@@ -46,30 +46,29 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeExchange(exchanges -> exchanges
-                .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .pathMatchers(HttpMethod.GET, "/api/cartelera/**").permitAll()
-                .pathMatchers(HttpMethod.GET, "/api/asientos/sala").permitAll()
-                .pathMatchers("/actuator/**").permitAll()
-                // API de administración de Kafka (ms-notificaciones): solo el grupo admin
-                .pathMatchers("/api/admin/**").hasAuthority(PREFIJO_GRUPO + grupoAdmin)
-                .pathMatchers("/api/asientos/**").authenticated()
-                .pathMatchers("/api/boletos/**").authenticated()
-                .anyExchange().authenticated()
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/api/cartelera/**").permitAll()
+                        .pathMatchers("/actuator/**").permitAll()
+                        // API de administración de Kafka (ms-notificaciones): solo el grupo admin
+                        .pathMatchers("/api/admin/**").hasAuthority(PREFIJO_GRUPO + grupoAdmin)
+                        .pathMatchers("/api/asientos/**").authenticated()
+                        .pathMatchers("/api/boletos/**").authenticated()
+                        .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(this::logAndConvert))
-                .authenticationEntryPoint((exchange, ex) -> {
-                    log.warn("401 UNAUTHORIZED - path={} reason={}",
-                            exchange.getRequest().getPath(), ex.getMessage());
-                    return Mono.fromRunnable(()
-                            -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED));
-                })
-                .accessDeniedHandler((exchange, denied) -> {
-                    log.warn("403 FORBIDDEN - path={} reason={}",
-                            exchange.getRequest().getPath(), denied.getMessage());
-                    return Mono.fromRunnable(()
-                            -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN));
-                })
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(this::logAndConvert))
+                        .authenticationEntryPoint((exchange, ex) -> {
+                            log.warn("401 UNAUTHORIZED - path={} reason={}",
+                                    exchange.getRequest().getPath(), ex.getMessage());
+                            return Mono.fromRunnable(()
+                                    -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED));
+                        })
+                        .accessDeniedHandler((exchange, denied) -> {
+                            log.warn("403 FORBIDDEN - path={} reason={}",
+                                    exchange.getRequest().getPath(), denied.getMessage());
+                            return Mono.fromRunnable(()
+                                    -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN));
+                        })
                 );
 
         return http.build();
