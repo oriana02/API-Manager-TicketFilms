@@ -41,10 +41,10 @@ spring:
           predicates:
             - Path=/api/boletos/**
 
-        # API de administración de Kafka (ms-notificaciones). El gateway exige
-        # el grupo admin antes de reenviar; ms-notificaciones valida de nuevo.
-        - id: notificaciones-route
-          uri: ${NOTIFICACIONES_URL:http://172.31.46.157:8084}
+        # API de administración de Kafka y RabbitMQ (ms-admin-mensajeria).
+        # El gateway exige el grupo admin antes de reenviar; ms-admin-mensajeria valida de nuevo.
+        - id: admin-mensajeria-route
+          uri: ${ADMIN_MENSAJERIA_URL:http://172.31.46.157:8085}
           predicates:
             - Path=/api/admin/**
 

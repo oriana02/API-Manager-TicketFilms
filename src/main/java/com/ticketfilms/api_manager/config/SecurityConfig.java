@@ -33,9 +33,9 @@ public class SecurityConfig {
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     // Cognito entrega los grupos del usuario en este claim; cada grupo se convierte
-    // en la autoridad GRUPO_<nombre> (mismo criterio que ms-notificaciones).
+    // en la autoridad ROLE_<nombre> (mismo estándar que usa ms-admin-mensajeria).
     private static final String CLAIM_GRUPOS = "cognito:groups";
-    private static final String PREFIJO_GRUPO = "GRUPO_";
+    private static final String PREFIJO_GRUPO = "ROLE_";
 
     private final JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/cartelera/**").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
-                        // API de administración de Kafka (ms-notificaciones): solo el grupo admin
+                        // API de administración: requiere la autoridad del grupo admin
                         .pathMatchers("/api/admin/**").hasAuthority(PREFIJO_GRUPO + grupoAdmin)
                         .pathMatchers("/api/asientos/**").authenticated()
                         .pathMatchers("/api/boletos/**").authenticated()
@@ -95,7 +95,7 @@ public class SecurityConfig {
         if (grupos != null) {
             grupos.forEach(g -> authorities.add(new SimpleGrantedAuthority(PREFIJO_GRUPO + g)));
         }
-        log.info("JWT valido - subject={} issuer={} authorities={}",
+        log.info("JWT válido - subject={} issuer={} authorities={}",
                 jwt.getSubject(), jwt.getIssuer(), authorities);
         return Mono.just(new JwtAuthenticationToken(jwt, authorities));
     }

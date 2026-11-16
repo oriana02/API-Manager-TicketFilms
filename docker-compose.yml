@@ -15,7 +15,7 @@ services:
       CARTELERA_URL: ${CARTELERA_URL:-http://ms-cartelera:8081}
       ASIENTOS_URL: ${ASIENTOS_URL:-http://ms-asientos:8082}
       BOLETOS_URL: ${BOLETOS_URL:-http://ms-boletos:8083}
-      NOTIFICACIONES_URL: ${NOTIFICACIONES_URL:-http://ms-notificaciones:8084}
+      ADMIN_MENSAJERIA_URL: ${ADMIN_MENSAJERIA_URL:-http://ms-admin-mensajeria:8085}
 
 networks:
   default:
