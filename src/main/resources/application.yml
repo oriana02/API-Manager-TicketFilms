@@ -36,7 +36,28 @@ spring:
           predicates:
             - Path=/api/asientos/**
 
+        # ---- Versionado de API (Examen Final): la versión se elige con el
+        # header X-App-Version y el filtro VersionAuthorizationFilter valida
+        # que el grupo del JWT coincida con esa versión. El orden hace que
+        # primero se evalúen las rutas con header y, si no viene, se use la
+        # ruta por defecto (versión vigente) ----
+        - id: boletos-v1-route
+          order: 1
+          uri: ${BOLETOS_V1_URL:http://172.31.46.157:8093}
+          predicates:
+            - Path=/api/boletos/**
+            - Header=X-App-Version, 1\.0\.0
+
+        - id: boletos-v2-route
+          order: 2
+          uri: ${BOLETOS_V2_URL:http://172.31.46.157:8083}
+          predicates:
+            - Path=/api/boletos/**
+            - Header=X-App-Version, 1\.1\.0
+
+        # Por defecto: cuando NO viene el header va a la versión vigente
         - id: boletos-route
+          order: 3
           uri: ${BOLETOS_URL:http://172.31.46.157:8083}
           predicates:
             - Path=/api/boletos/**
