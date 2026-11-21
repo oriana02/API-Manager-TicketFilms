@@ -26,7 +26,25 @@ spring:
 
       # RF-13: solo se exponen las rutas necesarias hacia los microservicios
       routes:
+        # Versionado de cartelera: 1.0.0 (8095) y 1.1.0 (8096); sin header
+        # va a la version vigente (8081). El orden garantiza que primero se
+        # evaluen las rutas con header y luego la ruta por defecto.
+        - id: cartelera-v1-route
+          order: 4
+          uri: ${CARTELERA_V1_URL:http://172.31.46.157:8095}
+          predicates:
+            - Path=/api/cartelera/**
+            - Header=X-App-Version, 1\.0\.0
+
+        - id: cartelera-v2-route
+          order: 5
+          uri: ${CARTELERA_V2_URL:http://172.31.46.157:8096}
+          predicates:
+            - Path=/api/cartelera/**
+            - Header=X-App-Version, 1\.1\.0
+
         - id: cartelera-route
+          order: 6
           uri: ${CARTELERA_URL:http://172.31.46.157:8081}
           predicates:
             - Path=/api/cartelera/**
