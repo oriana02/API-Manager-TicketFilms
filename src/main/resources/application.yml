@@ -50,7 +50,7 @@ spring:
 
         - id: boletos-v2-route
           order: 2
-          uri: ${BOLETOS_V2_URL:http://172.31.46.157:8083}
+          uri: ${BOLETOS_V2_URL:http://172.31.46.157:8094}
           predicates:
             - Path=/api/boletos/**
             - Header=X-App-Version, 1\.1\.0
